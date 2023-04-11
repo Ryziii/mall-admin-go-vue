@@ -38,10 +38,18 @@ func (a Mysql) DSN() string {
 		a.User, a.Password, a.Host, a.Port, a.DBName, a.Parameters)
 }
 
+func getSystemDir() string {
+	wd, _ := os.Getwd()
+	dir, err := filepath.Abs(filepath.Dir(wd + "/"))
+	if err != nil {
+		panic(err)
+	}
+	return strings.Replace(dir, "\\", "/", -1)
+}
 func GetEnv() Env {
 	t := Env{}
-
-	data, err := os.ReadFile("/Users/litingting/front-end/mall-admin/mall-admin-server-go/env/local.yaml")
+	systemDir := getSystemDir()
+	data, err := os.ReadFile(systemDir + "/env/local.yaml")
 
 	// 根据进程中的环境变量参数，判断使用哪份配置文件
 	currentENV := os.Getenv("env")
@@ -49,7 +57,7 @@ func GetEnv() Env {
 	if currentENV == "production" {
 		data, err = os.ReadFile(GetAppPath() + "/env/prodEnv.yaml")
 	} else if currentENV == "staging" {
-		data, err = os.ReadFile(GetAppPath() + "/env/devEnv.yaml")
+		data, err = os.ReadFile(systemDir + "/env/devEnv.yaml")
 	}
 
 	if err != nil {
